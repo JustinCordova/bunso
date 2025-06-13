@@ -7,7 +7,7 @@ Home page displays articles based on filter
 When you click on a post on home page it brings you to that article.
 
 
-🔧 Quillot Tech Stack
+🔧 Bunso Tech Stack
 
 🖥️ Frontend
 React
