@@ -1,0 +1,50 @@
+Social Media App
+Medium + Reddit Features
+Navbar contains logo, searchbar, create post, DMs, bookmarks, notifications, and account icon
+The logo brings you to home page
+The account icon drops down with links to user profile, settings, and logout
+Home page displays articles based on filter
+When you click on a post on home page it brings you to that article.
+
+
+🔧 Quillot Tech Stack
+
+🖥️ Frontend
+React
+TailwindCSS
+React Router DOM
+React – Component-based UI library
+
+⚙️ Backend (API Layer)
+Node.js + Express.js
+Express
+Mongoose
+Dotenv 
+Cors 
+bcryptjs 
+Multer
+
+💾 Database
+MongoDB Atlas
+Mongoose
+
+🔔 Notifications & Realtime
+Socket.io – Real-time DMs or notifications
+
+📦 Utilities
+Axios – For API calls from the client
+
+Dayjs – Time formatting
+
+clsx – Conditional class merging
+
+🧪 Dev & Tooling
+ESLint + Prettier – Code quality
+
+Nodemon – Auto-restart backend server
+
+Postman – API testing
+
+Vercel (frontend)
+Render digital ocean or heroku (backend)
+
