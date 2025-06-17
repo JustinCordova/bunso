@@ -1,12 +1,12 @@
-import express from "express";
-import bodyParser from "body-parser";
-import cors from "cors";
-import mongoose from "mongoose";
-import dotenv from "dotenv";
+import express from 'express';
+import bodyParser from 'body-parser';
+import cors from 'cors';
+import mongoose from 'mongoose';
+import dotenv from 'dotenv';
 dotenv.config();
-import path from "path";
 
-import postRoutes from "./routes/postRoutes.js";
+import postRouter from './routes/post.js';
+import userRouter from './routes/user.js';
 
 // express app
 const app = express();
@@ -23,7 +23,8 @@ app.use((req, res, next) => {
 });
 
 // routes
-app.use("/posts", postRoutes);
+app.use("/posts", postRouter);
+app.use("/user", userRouter);
 
 // connect to db
 mongoose
