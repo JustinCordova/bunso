@@ -1,56 +1,68 @@
-import React, { useState, useEffect } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useNavigate } from 'react-router-dom';
+import React, { useState } from "react";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
-import { FilePond, registerPlugin } from 'react-filepond';
-import FilePondPluginFileValidateType from 'filepond-plugin-file-validate-type';
-import FilePondPluginFileValidateSize from 'filepond-plugin-file-validate-size';
+import { FilePond, registerPlugin } from "react-filepond";
+import FilePondPluginFileValidateType from "filepond-plugin-file-validate-type";
+import FilePondPluginFileValidateSize from "filepond-plugin-file-validate-size";
 
-import 'filepond/dist/filepond.min.css';
+import "filepond/dist/filepond.min.css";
 
-import { createPost, updatePost } from '../actions/posts';
+import { createPost } from "../actions/posts";
 
 registerPlugin(FilePondPluginFileValidateType, FilePondPluginFileValidateSize);
 
-const Form = ({ currentId, setCurrentId }) => {
+const Form = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const post = useSelector((state) =>
-    currentId ? state.posts.find((p) => p._id === currentId) : null
-  );
 
   const [postData, setPostData] = useState({
-    title: '',
-    snippet: '',
-    body: '',
+    title: "",
+    snippet: "",
+    body: "",
     tags: [],
-    selectedFile: '',
+    selectedFile: "",
     published: true,
   });
-
   const [files, setFiles] = useState([]);
+  const [errors, setErrors] = useState([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (post) {
-      const { creator, slug, message, ...rest } = post;
-      setPostData({
-        ...rest,
-        body: message || '',
-        snippet: post.snippet || '',
-      });
+  const clear = () => {
+    setPostData({
+      title: "",
+      snippet: "",
+      body: "",
+      tags: [],
+      selectedFile: "",
+      published: true,
+    });
+    setFiles([]);
+    setErrors([]);
+  };
 
-      if (post.selectedFile) {
-        setFiles([{ source: post.selectedFile, options: { type: 'local' } }]);
-      }
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setErrors([]);
+
+    const result = await dispatch(createPost(postData));
+
+    if (result.success) {
+      clear();
+      navigate("/");
+    } else {
+      setErrors(result.errors);
     }
-  }, [post]);
+    setIsSubmitting(false);
+  };
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (files.length === 0) {
-      setPostData((prev) => ({ ...prev, selectedFile: '' }));
+      setPostData((prev) => ({ ...prev, selectedFile: "" }));
     } else {
       const fileItem = files[0];
-      if (fileItem.origin === 'local') {
+      if (fileItem.origin === "local") {
         setPostData((prev) => ({ ...prev, selectedFile: fileItem.source }));
       } else {
         const reader = new FileReader();
@@ -62,117 +74,122 @@ const Form = ({ currentId, setCurrentId }) => {
     }
   }, [files]);
 
-  const clear = () => {
-    setCurrentId(null);
-    setPostData({
-      title: '',
-      snippet: '',
-      body: '',
-      tags: [],
-      selectedFile: '',
-      published: true,
-    });
-    setFiles([]);
-  };
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    if (currentId === null || currentId === 0) {
-      dispatch(createPost(postData));
-    } else {
-      dispatch(updatePost(currentId, postData));
-    }
-
-    clear();
-    navigate('/');
-  };
-
   return (
-    <div className="max-w-xl mx-auto bg-white shadow-md rounded p-6">
-      <h2 className="text-2xl font-semibold mb-4">
-        {currentId ? `Editing "${post?.title}"` : 'Create a Post'}
+    <div className="max-w-xl mx-auto bg-transparent border border-white/20 backdrop-blur-md rounded-lg shadow-md p-6 mt-6">
+      <h2 className="text-2xl font-semibold mb-4 text-[var(--color-light-red)]">
+        Create a Post
       </h2>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          placeholder="Title"
-          value={postData.title}
-          onChange={(e) => setPostData({ ...postData, title: e.target.value })}
-          required
-          className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        />
+      {errors.length > 0 && (
+        <div className="mb-4 p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+          <ul className="list-disc list-inside text-red-400">
+            {errors.map((error, index) => (
+              <li key={index}>{error.msg}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
-        <input
-          type="text"
-          placeholder="Snippet (short preview or description)"
-          value={postData.snippet}
-          onChange={(e) => setPostData({ ...postData, snippet: e.target.value })}
-          className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        />
-
-        <textarea
-          placeholder="Body"
-          value={postData.body}
-          onChange={(e) => setPostData({ ...postData, body: e.target.value })}
-          rows={5}
-          required
-          className="w-full border border-gray-300 rounded px-3 py-2 resize-none focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        />
-
-        <input
-          type="text"
-          placeholder="Tags (comma separated)"
-          value={postData.tags.join(',')}
-          onChange={(e) =>
-            setPostData({
-              ...postData,
-              tags: e.target.value.split(',').map((tag) => tag.trim()),
-            })
-          }
-          className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        />
-
-        <div>
-          <label className="block mb-1 font-medium">Upload Image</label>
+      <form onSubmit={handleSubmit}>
+        <div className="mb-4">
+          <label
+            className="block text-white/80 text-sm font-bold mb-2"
+            htmlFor="title"
+          >
+            Title
+          </label>
+          <input
+            type="text"
+            id="title"
+            value={postData.title}
+            onChange={(e) =>
+              setPostData({ ...postData, title: e.target.value })
+            }
+            className="shadow appearance-none border border-white/10 rounded w-full py-2 px-3 text-white bg-white/5 leading-tight focus:outline-none focus:border-[var(--color-light-purple)] focus:ring-1 focus:ring-[var(--color-light-purple)]"
+            required
+          />
+        </div>
+        <div className="mb-4">
+          <label
+            className="block text-white/80 text-sm font-bold mb-2"
+            htmlFor="snippet"
+          >
+            Snippet
+          </label>
+          <input
+            type="text"
+            id="snippet"
+            value={postData.snippet}
+            onChange={(e) =>
+              setPostData({ ...postData, snippet: e.target.value })
+            }
+            className="shadow appearance-none border border-white/10 rounded w-full py-2 px-3 text-white bg-white/5 leading-tight focus:outline-none focus:border-[var(--color-light-purple)] focus:ring-1 focus:ring-[var(--color-light-purple)]"
+          />
+        </div>
+        <div className="mb-4">
+          <label
+            className="block text-white/80 text-sm font-bold mb-2"
+            htmlFor="body"
+          >
+            Body
+          </label>
+          <textarea
+            id="body"
+            value={postData.body}
+            onChange={(e) => setPostData({ ...postData, body: e.target.value })}
+            className="shadow appearance-none border border-white/10 rounded w-full py-2 px-3 text-white bg-white/5 leading-tight focus:outline-none focus:border-[var(--color-light-purple)] focus:ring-1 focus:ring-[var(--color-light-purple)] h-32"
+            required
+          />
+        </div>
+        <div className="mb-4">
+          <label
+            className="block text-white/80 text-sm font-bold mb-2"
+            htmlFor="tags"
+          >
+            Tags (comma separated)
+          </label>
+          <input
+            type="text"
+            id="tags"
+            value={postData.tags.join(",")}
+            onChange={(e) =>
+              setPostData({
+                ...postData,
+                tags: e.target.value.split(",").map((tag) => tag.trim()),
+              })
+            }
+            className="shadow appearance-none border border-white/10 rounded w-full py-2 px-3 text-white bg-white/5 leading-tight focus:outline-none focus:border-[var(--color-light-purple)] focus:ring-1 focus:ring-[var(--color-light-purple)]"
+          />
+        </div>
+        <div className="mb-4">
+          <label className="block text-white/80 text-sm font-bold mb-2">
+            Image
+          </label>
           <FilePond
             files={files}
             onupdatefiles={setFiles}
-            allowMultiple={true}
-            acceptedFileTypes={['image/png', 'image/jpeg']}
+            allowMultiple={false}
+            maxFiles={1}
+            acceptedFileTypes={["image/*"]}
             maxFileSize="5MB"
             labelIdle='Drag & Drop your image or <span class="filepond--label-action">Browse</span>'
-            allowImagePreview={true}
+            className="bg-white/5 border border-white/10 rounded"
           />
         </div>
-
-        <div className="flex items-center space-x-2">
-          <input
-            type="checkbox"
-            checked={postData.published}
-            onChange={(e) =>
-              setPostData({ ...postData, published: e.target.checked })
-            }
-            id="published"
-            className="h-4 w-4"
-          />
-          <label htmlFor="published" className="select-none">
-            Published
-          </label>
-        </div>
-
-        <div className="flex space-x-3">
+        <div className="flex items-center justify-between">
           <button
             type="submit"
-            className="flex-1 bg-indigo-600 text-white rounded px-4 py-2 hover:bg-indigo-700"
+            disabled={isSubmitting}
+            className={`bg-[var(--color-light-red)] hover:bg-[var(--color-light-red)]/80 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-[var(--color-light-red)]/50 transition-colors duration-200 ${
+              isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
-            Submit
+            {isSubmitting ? "Creating..." : "Create"}
           </button>
           <button
             type="button"
             onClick={clear}
-            className="flex-1 bg-gray-300 text-gray-700 rounded px-4 py-2 hover:bg-gray-400"
+            className="bg-white/10 hover:bg-white/20 text-white font-bold py-2 px-4 rounded focus:outline-none focus:ring-2 focus:ring-white/30 transition-colors duration-200"
           >
             Clear
           </button>

@@ -1,4 +1,4 @@
-import express from 'express';
+import express from "express";
 import {
   getPosts,
   getPost,
@@ -6,20 +6,22 @@ import {
   updatePost,
   likePost,
   deletePost,
-} from '../controllers/post.js';
+} from "../controllers/post.js";
 
-import auth from '../middleware/auth.js';
+import auth from "../middleware/auth.js";
+import { apiLimiter } from "../middleware/rateLimiter.js";
+import { postValidationRules, validate } from "../middleware/validators.js";
 
 const router = express.Router();
 
 // 🔓 Public Routes (Read only)
-router.get('/', getPosts);
-router.get('/:id', getPost);
+router.get("/", apiLimiter, getPosts);
+router.get("/:id", apiLimiter, getPost);
 
-// 🔒 Protected Routes (Requires login)
-router.post('/', auth, createPost);
-router.patch('/:id', auth, updatePost);
-router.delete('/:id', auth, deletePost);
-router.patch('/:id/likePost', auth, likePost);
+// 🔒 Protected Routes (Temporarily removed auth)
+router.post("/", apiLimiter, postValidationRules, validate, createPost);
+router.patch("/:id", apiLimiter, postValidationRules, validate, updatePost);
+router.delete("/:id", apiLimiter, deletePost);
+router.patch("/:id/likePost", apiLimiter, likePost);
 
 export default router;

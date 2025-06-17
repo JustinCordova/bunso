@@ -1,12 +1,15 @@
-import { FETCH_POST } from "../constants/actionTypes";
+import { createSlice } from "@reduxjs/toolkit";
 
-const postReducer = (state = null, action) => {
-  switch (action.type) {
-    case FETCH_POST:
+const postSlice = createSlice({
+  name: "post",
+  initialState: null,
+  reducers: {
+    fetchPost: (state, action) => {
+      console.log("Reducer received post data:", action.payload);
       return action.payload;
-    default:
-      return state;
-  }
-};
+    },
+  },
+});
 
-export default postReducer;
+export const { fetchPost } = postSlice.actions;
+export default postSlice.reducer;

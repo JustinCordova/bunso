@@ -1,12 +1,11 @@
-import { FETCH_ALL, FETCH_POST, CREATE, UPDATE, DELETE, LIKE } from "../constants/actionTypes.js";
-
 import * as api from "../api/index.js";
+import { fetchAll, create, update, like, deletePost } from "../reducers/posts";
+import { fetchPost } from "../reducers/post";
 
 export const getPosts = () => async (dispatch) => {
   try {
     const { data } = await api.fetchPosts();
-
-    dispatch({ type: FETCH_ALL, payload: data });
+    dispatch(fetchAll(data));
   } catch (error) {
     console.log(error.message);
   }
@@ -14,48 +13,72 @@ export const getPosts = () => async (dispatch) => {
 
 export const getPost = (id) => async (dispatch) => {
   try {
+    console.log("Fetching post with ID:", id);
     const { data } = await api.fetchPost(id);
-    dispatch({ type: FETCH_POST, payload: data });
+    console.log("Received post data:", data);
+    if (data) {
+      dispatch(fetchPost(data));
+    }
+    return data;
   } catch (error) {
-    console.log(error.message);
+    console.error("Error fetching post:", error.message);
+    return null;
   }
 };
 
 export const createPost = (post) => async (dispatch) => {
   try {
     const { data } = await api.createPost(post);
-
-    dispatch({ type: CREATE, payload: data });
+    dispatch(create(data));
+    return { success: true };
   } catch (error) {
-    console.log(error.message);
+    console.error(
+      "Error creating post:",
+      error.response?.data || error.message
+    );
+    return {
+      success: false,
+      errors: error.response?.data?.errors || [
+        { msg: error.response?.data?.message || error.message },
+      ],
+    };
   }
 };
 
 export const updatePost = (id, post) => async (dispatch) => {
   try {
+    console.log("Updating post:", { id, post });
     const { data } = await api.updatePost(id, post);
-
-    dispatch({ type: UPDATE, payload: data });
+    console.log("Update response:", data);
+    dispatch(update(data));
+    return { success: true };
   } catch (error) {
-    console.log(error.message);
+    console.error(
+      "Error updating post:",
+      error.response?.data || error.message
+    );
+    return {
+      success: false,
+      errors: error.response?.data?.errors || [
+        { msg: error.response?.data?.message || error.message },
+      ],
+    };
   }
 };
 
 export const likePost = (id) => async (dispatch) => {
   try {
     const { data } = await api.likePost(id);
-
-    dispatch({ type: LIKE, payload: data });
+    dispatch(like(data));
   } catch (error) {
     console.log(error.message);
   }
 };
 
-export const deletePost = (id) => async (dispatch) => {
+export const deletePostAction = (id) => async (dispatch) => {
   try {
     await api.deletePost(id);
-
-    dispatch({ type: DELETE, payload: id });
+    dispatch(deletePost(id));
   } catch (error) {
     console.log(error.message);
   }

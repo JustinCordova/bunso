@@ -1,10 +1,12 @@
 import jwt from "jsonwebtoken";
 import User from "../models/user.js";
+import logger from "../utils/logger.js";
 
 const auth = async (req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization || !authorization.startsWith("Bearer ")) {
+    logger.warn("Missing or invalid authorization header");
     return res.status(401).json({ error: "Authorization token required" });
   }
 
@@ -17,13 +19,16 @@ const auth = async (req, res, next) => {
 
     if (isCustomAuth) {
       // Custom JWT (your app)
-      decodedData = jwt.verify(token, process.env.SECRET);
+      decodedData = jwt.verify(token, process.env.JWT_SECRET);
 
       req.userId = decodedData?.id;
 
       // Optionally attach the full user
       const user = await User.findById(req.userId).select("_id");
       if (!user) {
+        logger.warn("User not found during authentication", {
+          userId: req.userId,
+        });
         return res.status(401).json({ error: "User not found" });
       }
       req.user = user;
@@ -37,7 +42,10 @@ const auth = async (req, res, next) => {
 
     next();
   } catch (error) {
-    console.error("Auth error:", error.message);
+    logger.error("Authentication error", {
+      error: error.message,
+      stack: error.stack,
+    });
     res.status(401).json({ error: "Request is not authorized" });
   }
 };

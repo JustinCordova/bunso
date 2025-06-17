@@ -1,20 +1,40 @@
 import { useSelector } from "react-redux";
 import Post from "./Post";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const Posts = ({ setCurrentId }) => {
-  const posts = useSelector(state => state.posts);
+  const posts = useSelector((state) => state.posts);
   const [visibleCount, setVisibleCount] = useState(5);
+  const [isLoading, setIsLoading] = useState(true);
 
-  if (!posts || posts.length === 0) {
+  useEffect(() => {
+    // Only set loading to false if posts is an array (meaning it's been loaded)
+    if (Array.isArray(posts)) {
+      setIsLoading(false);
+    }
+  }, [posts]);
+
+  if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <p className="text-gray-400 text-lg">No posts yet. Be the first to create one!</p>
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[var(--color-light-purple)]"></div>
       </div>
     );
   }
 
-  const sortedPosts = [...posts].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+  if (!posts || posts.length === 0) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <p className="text-gray-400 text-lg">
+          No posts yet. Be the first to create one!
+        </p>
+      </div>
+    );
+  }
+
+  const sortedPosts = [...posts].sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  );
   const visiblePosts = sortedPosts.slice(0, visibleCount);
 
   return (
