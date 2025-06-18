@@ -2,7 +2,13 @@
 
 **Bunso** is a modern blog and discussion platform that allows users to share posts, express opinions, and stay connected. It combines the simplicity of writing with the community features you'd expect from a social content app.
 
-![Preview](./assets/sample.png)
+## Previews
+<div style="display: flex; flex-wrap: wrap; gap: 10px; justify-content: space-between;">
+  <img src="./assets/sample1.png" alt="Preview 1" style="width: 24%; border-radius: 8px;" />
+  <img src="./assets/sample2.png" alt="Preview 2" style="width: 24%; border-radius: 8px;" />
+  <img src="./assets/sample3.png" alt="Preview 3" style="width: 24%; border-radius: 8px;" />
+  <div style="width: 24%;"></div> <!-- optional filler if only 3 images -->
+</div>
 
 ## 🚀 Features
 
