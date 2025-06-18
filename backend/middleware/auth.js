@@ -19,7 +19,7 @@ const auth = async (req, res, next) => {
 
     if (isCustomAuth) {
       // Custom JWT (your app)
-      decodedData = jwt.verify(token, process.env.JWT_SECRET);
+      decodedData = jwt.verify(token, process.env.SECRET);
 
       req.userId = decodedData?.id;
 

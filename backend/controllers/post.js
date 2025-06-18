@@ -9,8 +9,16 @@ const router = express.Router();
 
 export const getPosts = async (req, res) => {
   try {
-    const posts = await Post.find().populate("creatorId", "name");
-    res.status(200).json(posts);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const skip = (page - 1) * limit;
+    const total = await Post.countDocuments();
+    const posts = await Post.find()
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate("creatorId", "username name");
+    res.status(200).json({ posts, total });
   } catch (error) {
     logger.error("Error fetching posts", {
       error: error.message,
@@ -24,7 +32,7 @@ export const getPost = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const post = await Post.findById(id).populate("creatorId", "name");
+    const post = await Post.findById(id).populate("creatorId", "username name");
     if (!post) {
       logger.warn("Post not found", { id });
       return res.status(404).json({ message: "Post not found" });
@@ -42,12 +50,12 @@ export const getPost = async (req, res) => {
 
 export const createPost = async (req, res) => {
   try {
-    const { title, body, snippet, selectedFile, ...rest } = req.body;
+    const { title, body, snippet, selectedFile, tags, published, slug } =
+      req.body;
 
     // Validate image if present
     if (selectedFile) {
       try {
-        // Basic validation of base64 string
         if (!selectedFile.startsWith("data:image/")) {
           throw new Error("Invalid image format");
         }
@@ -60,9 +68,7 @@ export const createPost = async (req, res) => {
       }
     }
 
-    const slug = slugify(title, { lower: true, strict: true });
-
-    // Generate snippet if not provided
+    const generatedSlug = slug || slugify(title, { lower: true, strict: true });
     const generatedSnippet =
       snippet ||
       (body ? body.substring(0, 150) + (body.length > 150 ? "..." : "") : "");
@@ -71,9 +77,11 @@ export const createPost = async (req, res) => {
       title,
       body,
       snippet: generatedSnippet,
-      slug,
+      slug: generatedSlug,
       selectedFile,
-      ...rest,
+      tags,
+      published,
+      creatorId: req.userId, // Tie post to user
     });
 
     await newPost.save();
@@ -110,6 +118,13 @@ export const updatePost = async (req, res) => {
       return res.status(404).json({ message: "Post not found" });
     }
 
+    // Authorization check
+    if (String(existingPost.creatorId) !== req.userId) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to modify this post." });
+    }
+
     const { title, snippet, body, tags, selectedFile } = req.body;
     logger.info("Updating post", {
       postId: id,
@@ -120,7 +135,6 @@ export const updatePost = async (req, res) => {
     // Validate image if present
     if (selectedFile) {
       try {
-        // Basic validation of base64 string
         if (!selectedFile.startsWith("data:image/")) {
           throw new Error("Invalid image format");
         }
@@ -139,8 +153,7 @@ export const updatePost = async (req, res) => {
       snippet,
       body,
       tags,
-      selectedFile: selectedFile || "", // Always use the new selectedFile value
-      creator: existingPost.creator,
+      selectedFile: selectedFile || "",
       creatorId: existingPost.creatorId,
       _id: id,
     };
@@ -186,6 +199,19 @@ export const deletePost = async (req, res) => {
   }
 
   try {
+    const existingPost = await Post.findById(id);
+    if (!existingPost) {
+      logger.warn("Post not found for deletion", { id });
+      return res.status(404).json({ message: "Post not found" });
+    }
+
+    // Authorization check
+    if (String(existingPost.creatorId) !== req.userId) {
+      return res
+        .status(403)
+        .json({ message: "You are not authorized to delete this post." });
+    }
+
     const deleted = await Post.findByIdAndDelete(id);
     if (!deleted) {
       logger.warn("Post not found for deletion", { id });

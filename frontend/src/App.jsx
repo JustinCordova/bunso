@@ -10,9 +10,11 @@ import Form from "./pages/Form";
 import EditPost from "./pages/EditPost";
 // import Messages from "./pages/Messages";
 // import Bookmarks from "./pages/Bookmarks";
-// import Profile from "./pages/Profile";
+import ProfilePage from "./pages/ProfilePage";
 
 import PostDetails from "./pages/PostDetails";
+import AuthPage from "./pages/AuthPage";
+import PrivateRoute from "./components/PrivateRoute";
 
 import { getPosts } from "./actions/posts";
 
@@ -26,21 +28,41 @@ const App = () => {
 
   return (
     <>
-      <Navbar />
       <Routes>
-        <Route path="/" element={<Home setCurrentId={setCurrentId} />} />
+        <Route path="/login" element={<AuthPage mode="login" />} />
+        <Route path="/register" element={<AuthPage mode="register" />} />
+        {/* Must be logged in to access these routes */}
         <Route
-          path="/posts/:id"
-          element={<PostDetails setCurrentId={setCurrentId} />}
+          path="*"
+          element={
+            <PrivateRoute>
+              <>
+                <Navbar />
+                <Routes>
+                  <Route
+                    path="/"
+                    element={<Home setCurrentId={setCurrentId} />}
+                  />
+                  <Route
+                    path="/posts/:id"
+                    element={<PostDetails setCurrentId={setCurrentId} />}
+                  />
+                  <Route
+                    path="/create"
+                    element={
+                      <Form currentId={currentId} setCurrentId={setCurrentId} />
+                    }
+                  />
+                  <Route path="/edit/:id" element={<EditPost />} />
+                  <Route path="/profile" element={<ProfilePage />} />
+                  {/* <Route path="/messages" element={<Messages />} />
+                  <Route path="/bookmarks" element={<Bookmarks />} />
+                  <Route path="/profile" element={<Profile />} /> */}
+                </Routes>
+              </>
+            </PrivateRoute>
+          }
         />
-        <Route
-          path="/create"
-          element={<Form currentId={currentId} setCurrentId={setCurrentId} />}
-        />
-        <Route path="/edit/:id" element={<EditPost />} />
-        {/* <Route path="/messages" element={<Messages />} />
-        <Route path="/bookmarks" element={<Bookmarks />} />
-        <Route path="/profile" element={<Profile />} /> */}
       </Routes>
     </>
   );

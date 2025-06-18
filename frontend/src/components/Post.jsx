@@ -1,11 +1,14 @@
 import { useDispatch } from "react-redux";
 import { likePost } from "../actions/posts";
 import { FiHeart } from "react-icons/fi";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { format } from "date-fns";
 
-const Post = ({ post }) => {
+const Post = ({ post, setCurrentId }) => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("bunso_user"));
+  const isOwner = user && post.creatorId?._id === user._id;
 
   return (
     <div className="w-full bg-transparent rounded-lg shadow-md overflow-hidden p-4 relative flex flex-col justify-between h-full border border-white/5 backdrop-blur-md hover:bg-[rgba(187,154,247,0.05)] transition-colors duration-600">
@@ -37,7 +40,7 @@ const Post = ({ post }) => {
 
         {/* Author Name */}
         <div className="text-sm text-white/60 mt-1">
-          By {post.creatorId?.name || "Anonymous"}
+          By {post.creatorId?.username || post.creatorId?.name || "Anonymous"}
         </div>
 
         {/* Snippet (white) */}

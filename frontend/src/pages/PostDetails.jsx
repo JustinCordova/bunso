@@ -10,6 +10,8 @@ const PostDetails = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const post = useSelector((state) => state.post);
+  const user = JSON.parse(localStorage.getItem("bunso_user"));
+  const isOwner = user && post?.creatorId?._id === user._id;
 
   useEffect(() => {
     dispatch(getPost(id));
@@ -66,36 +68,39 @@ const PostDetails = () => {
           <span>Back</span>
         </button>
 
-        <div className="flex gap-2">
-          <button
-            onClick={handleEdit}
-            className="
-              inline-flex items-center justify-center
-              text-white
-              bg-white/10
-              hover:bg-white/20
-              focus:outline-none focus:ring-1 focus:ring-white/30
-              rounded px-3 py-1 font-medium shadow-sm transition duration-150 select-none
-            "
-            title="Edit"
-          >
-            <FiEdit2 className="h-4 w-4" />
-          </button>
-          <button
-            onClick={handleDelete}
-            className="
-              inline-flex items-center justify-center
-              text-white
-              bg-red-500/10
-              hover:bg-red-500/20
-              focus:outline-none focus:ring-1 focus:ring-red-300/40
-              rounded px-3 py-1 font-medium shadow-sm transition duration-150 select-none
-            "
-            title="Delete"
-          >
-            <FiTrash2 className="h-4 w-4" />
-          </button>
-        </div>
+        {/* Edit/Delete Buttons (only for owner) */}
+        {isOwner && (
+          <div className="flex gap-2">
+            <button
+              onClick={handleEdit}
+              className="
+                inline-flex items-center justify-center
+                text-white
+                bg-white/10
+                hover:bg-white/20
+                focus:outline-none focus:ring-1 focus:ring-white/30
+                rounded px-3 py-1 font-medium shadow-sm transition duration-150 select-none
+              "
+              title="Edit"
+            >
+              <FiEdit2 className="h-4 w-4" />
+            </button>
+            <button
+              onClick={handleDelete}
+              className="
+                inline-flex items-center justify-center
+                text-white
+                bg-red-500/10
+                hover:bg-red-500/20
+                focus:outline-none focus:ring-1 focus:ring-red-300/40
+                rounded px-3 py-1 font-medium shadow-sm transition duration-150 select-none
+              "
+              title="Delete"
+            >
+              <FiTrash2 className="h-4 w-4" />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Post Title */}
@@ -108,7 +113,7 @@ const PostDetails = () => {
 
       {/* Author Name */}
       <div className="text-sm text-white/60 mb-2">
-        By {post.creatorId?.name || "Anonymous"}
+        By {post.creatorId?.username || post.creatorId?.name || "Anonymous"}
       </div>
 
       {/* Timestamp */}

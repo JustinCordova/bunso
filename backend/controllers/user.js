@@ -1,19 +1,21 @@
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
-import User from '../models/user.js';
-
+import User from "../models/user.js";
 
 export const signup = async (req, res) => {
-  const { email, password, firstName, lastName, username } = req.body;
+  const { email, password, firstName, lastName, username, profilePicture } =
+    req.body;
 
   try {
     // Check if user already exists by email or username
     const existingEmail = await User.findOne({ email });
     const existingUsername = await User.findOne({ username });
 
-    if (existingEmail) return res.status(400).json({ message: "Email already in use" });
-    if (existingUsername) return res.status(400).json({ message: "Username already taken" });
+    if (existingEmail)
+      return res.status(400).json({ message: "Email already in use" });
+    if (existingUsername)
+      return res.status(400).json({ message: "Username already taken" });
 
     // Hash the password
     const hashedPassword = await bcrypt.hash(password, 12);
@@ -23,7 +25,8 @@ export const signup = async (req, res) => {
       name: `${firstName} ${lastName}`,
       username,
       email,
-      password: hashedPassword
+      password: hashedPassword,
+      profilePicture: profilePicture || "",
     });
 
     // Create JWT token
@@ -46,7 +49,7 @@ export const signin = async (req, res) => {
   try {
     // Try finding user by email OR username
     const user = await User.findOne({
-      $or: [{ email: identifier }, { username: identifier }]
+      $or: [{ email: identifier }, { username: identifier }],
     });
 
     if (!user) {
@@ -72,8 +75,30 @@ export const signin = async (req, res) => {
   }
 };
 
-/*
-Your frontend sends firstName and lastName.
-Your controller combines them into name.
-Your model just has name, which is valid.
-*/
+export const updateUser = async (req, res) => {
+  const { id } = req.params;
+  if (req.userId !== id) {
+    return res
+      .status(403)
+      .json({ message: "You are not authorized to update this profile." });
+  }
+  const { name, username, bio, profilePicture } = req.body;
+  try {
+    const updatedFields = {};
+    if (name) updatedFields.name = name;
+    if (username) updatedFields.username = username;
+    if (bio !== undefined) updatedFields.bio = bio;
+    if (profilePicture !== undefined)
+      updatedFields.profilePicture = profilePicture;
+    const updatedUser = await User.findByIdAndUpdate(
+      id,
+      { $set: updatedFields },
+      { new: true, runValidators: true }
+    );
+    if (!updatedUser)
+      return res.status(404).json({ message: "User not found" });
+    res.json(updatedUser);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};

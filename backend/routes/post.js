@@ -19,9 +19,9 @@ router.get("/", apiLimiter, getPosts);
 router.get("/:id", apiLimiter, getPost);
 
 // 🔒 Protected Routes (Temporarily removed auth)
-router.post("/", apiLimiter, postValidationRules, validate, createPost);
-router.patch("/:id", apiLimiter, postValidationRules, validate, updatePost);
-router.delete("/:id", apiLimiter, deletePost);
-router.patch("/:id/likePost", apiLimiter, likePost);
+router.post("/", auth, apiLimiter, postValidationRules, validate, createPost);
+router.patch("/:id", auth, apiLimiter, postValidationRules, validate, updatePost);
+router.delete("/:id", auth, apiLimiter, deletePost);
+router.patch("/:id/likePost", auth, apiLimiter, likePost);
 
 export default router;

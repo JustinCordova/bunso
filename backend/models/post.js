@@ -1,36 +1,38 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-const postSchema = mongoose.Schema({
-  title: { type: String, required: true },
-  body: { type: String, required: true },
-  snippet: { type: String }, // 👈 new field for teaser text
-  creator: String,
-  creatorId: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+const postSchema = mongoose.Schema(
+  {
+    title: { type: String, required: true },
+    body: { type: String, required: true },
+    snippet: { type: String }, // 👈 new field for teaser text
+    creatorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
+    tags: [String],
+    selectedFile: String,
+    likeCount: {
+      type: Number,
+      default: 0,
+    },
+    comments: {
+      type: [String],
+      default: [],
+    },
+    published: {
+      type: Boolean,
+      default: true,
+    },
+    slug: {
+      type: String,
+      unique: true,
+    },
   },
-  tags: [String],
-  selectedFile: String,
-  likeCount: {
-    type: Number,
-    default: 0,
-  },
-  comments: {
-    type: [String],
-    default: [],
-  },
-  published: {
-    type: Boolean,
-    default: true,
-  },
-  slug: {
-    type: String,
-    unique: true,
-  }
-}, { timestamps: true });
+  { timestamps: true }
+);
 
-
-const Post = mongoose.model('Post', postSchema);
+const Post = mongoose.model("Post", postSchema);
 export default Post;
 
 // Old

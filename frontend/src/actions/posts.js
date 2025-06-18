@@ -2,14 +2,18 @@ import * as api from "../api/index.js";
 import { fetchAll, create, update, like, deletePost } from "../reducers/posts";
 import { fetchPost } from "../reducers/post";
 
-export const getPosts = () => async (dispatch) => {
-  try {
-    const { data } = await api.fetchPosts();
-    dispatch(fetchAll(data));
-  } catch (error) {
-    console.log(error.message);
-  }
-};
+export const getPosts =
+  (page = 1, limit = 10) =>
+  async (dispatch) => {
+    try {
+      const { data } = await api.fetchPosts(page, limit);
+      dispatch(fetchAll(data.posts));
+      return { total: data.total, posts: data.posts };
+    } catch (error) {
+      console.log(error.message);
+      return { total: 0, posts: [] };
+    }
+  };
 
 export const getPost = (id) => async (dispatch) => {
   try {
