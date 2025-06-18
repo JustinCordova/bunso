@@ -7,18 +7,44 @@ backend/
 ├── controllers/  # Request handlers
 ├── models/       # Database models
 ├── routes/       # API routes
+├── middleware/   # Auth, validation, rate limiting, logging
 └── index.js      # Application entry point
 ```
 
 ## Database Schema
 
-_Coming soon with authentication implementation_
+### User
+
+- `name`: String
+- `username`: String (unique)
+- `email`: String (unique)
+- `password`: String (hashed)
+- `bio`: String
+- `profilePicture`: String (base64 or URL)
+- `createdAt`: Date
+
+### Post
+
+- `title`: String
+- `body`: String
+- `snippet`: String
+- `tags`: [String]
+- `selectedFile`: String (base64 image)
+- `creatorId`: ObjectId (ref: User)
+- `likeCount`: Number
+- `comments`: [String]
+- `published`: Boolean
+- `slug`: String
+- `createdAt`: Date
 
 ## Security
 
 - CORS is configured to only allow requests from the frontend application
 - Environment variables are used for sensitive configuration
-- Authentication middleware will be implemented for protected routes
+- JWT authentication middleware protects sensitive routes
+- Only post creators can edit/delete their posts
+- Only users can edit their own profile
+- Rate limiting and input validation are enforced
 
 ## Setup and Installation
 
@@ -33,10 +59,10 @@ npm install
    Create a `.env` file with:
 
 ```env
-PORT=5000
+PORT=4000
 MONGO_URI=your_mongodb_connection_string
 FRONTEND_URL=http://localhost:5173
-JWT_SECRET=your_jwt_secret
+SECRET=your_jwt_secret
 ```
 
 3. Start the server:
@@ -64,14 +90,13 @@ npm start
 
 ### Database
 
-- Use proper indexing
+- Use proper indexing (e.g., on `createdAt`)
 - Implement data validation
 - Use transactions where necessary
 - Implement proper error handling
 
 ### Performance
 
-- Implement caching where appropriate
-- Use proper database queries
-- Implement pagination for large datasets
+- Implement pagination for large datasets (see `/posts?page=1&limit=10`)
 - Use compression for responses
+- Store images efficiently (consider cloud storage for production)
