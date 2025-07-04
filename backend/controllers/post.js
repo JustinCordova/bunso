@@ -277,15 +277,36 @@ export const searchPosts = async (req, res) => {
   const searchTerm = req.query.q;
 
   try {
-    const results = await Post.find({
+    // Split search term into words and create regex patterns
+    const searchWords = searchTerm
+      .trim()
+      .split(/\s+/)
+      .filter((word) => word.length > 0);
+
+    if (searchWords.length === 0) {
+      return res.json([]);
+    }
+
+    // Create regex patterns for each word
+    const searchPatterns = searchWords.map((word) => ({
       $or: [
-        { title: { $regex: searchTerm, $options: "i" } },
-        { body: { $regex: searchTerm, $options: "i" } },
+        { title: { $regex: word, $options: "i" } },
+        { body: { $regex: word, $options: "i" } },
       ],
-    });
+    }));
+
+    // Find posts that match ALL words (AND logic)
+    const results = await Post.find({
+      $and: searchPatterns,
+    }).populate("creatorId", "username name");
 
     res.json(results);
   } catch (error) {
+    logger.error("Error searching posts", {
+      searchTerm,
+      error: error.message,
+      stack: error.stack,
+    });
     res.status(500).json({ message: error.message });
   }
 };

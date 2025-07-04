@@ -8,7 +8,7 @@ import Navbar from "./components/Navbar";
 import Home from "./pages/Home";
 import Form from "./pages/Form";
 import EditPost from "./pages/EditPost";
-// import Messages from "./pages/Messages";
+import Messages from "./pages/Messages";
 // import Bookmarks from "./pages/Bookmarks";
 import ProfilePage from "./pages/ProfilePage";
 
@@ -55,9 +55,9 @@ const App = () => {
                   />
                   <Route path="/edit/:id" element={<EditPost />} />
                   <Route path="/profile" element={<ProfilePage />} />
-                  {/* <Route path="/messages" element={<Messages />} />
-                  <Route path="/bookmarks" element={<Bookmarks />} />
-                  <Route path="/profile" element={<Profile />} /> */}
+                  <Route path="/messages" element={<Messages />} />
+                  {/* <Route path="/bookmarks" element={<Bookmarks />} /> */}
+                  {/* <Route path="/profile" element={<Profile />} /> */}
                 </Routes>
               </>
             </PrivateRoute>

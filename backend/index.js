@@ -8,9 +8,15 @@ dotenv.config();
 
 import postRouter from "./routes/post.js";
 import userRouter from "./routes/user.js";
+import messageRouter from "./routes/message.js";
+
+import http from "http";
+import setupSocket from "./socket.js";
 
 // express app
 const app = express();
+const server = http.createServer(app);
+setupSocket(server);
 
 // middleware
 app.use(express.json({ limit: "50mb" }));
@@ -30,6 +36,7 @@ app.use((req, res, next) => {
 // routes
 app.use("/posts", postRouter);
 app.use("/users", userRouter);
+app.use("/messages", messageRouter);
 
 // connect to db
 mongoose
@@ -37,7 +44,7 @@ mongoose
   .then(() => {
     console.log("connected to database");
     // listen to port
-    app.listen(process.env.PORT, () => {
+    server.listen(process.env.PORT, () => {
       console.log(`\nServer Running on: http://localhost:${process.env.PORT}`);
     });
   })
