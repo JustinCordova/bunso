@@ -17,7 +17,9 @@ export const getPosts = async (req, res) => {
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .populate("creatorId", "username name");
+      .select("-selectedFile")
+      .populate("creatorId", "username name")
+      .lean();
     res.status(200).json({ posts, total });
   } catch (error) {
     logger.error("Error fetching posts", {
@@ -32,7 +34,9 @@ export const getPost = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const post = await Post.findById(id).populate("creatorId", "username name");
+    const post = await Post.findById(id)
+      .populate("creatorId", "username name")
+      .lean();
     if (!post) {
       logger.warn("Post not found", { id });
       return res.status(404).json({ message: "Post not found" });
@@ -266,6 +270,23 @@ export const likePost = async (req, res) => {
       message: "Failed to like post",
       error: process.env.NODE_ENV === "development" ? error.message : undefined,
     });
+  }
+};
+
+export const searchPosts = async (req, res) => {
+  const searchTerm = req.query.q;
+
+  try {
+    const results = await Post.find({
+      $or: [
+        { title: { $regex: searchTerm, $options: "i" } },
+        { body: { $regex: searchTerm, $options: "i" } },
+      ],
+    });
+
+    res.json(results);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
   }
 };
 

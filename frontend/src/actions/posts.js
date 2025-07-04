@@ -1,6 +1,7 @@
 import * as api from "../api/index.js";
 import { fetchAll, create, update, like, deletePost } from "../reducers/posts";
 import { fetchPost } from "../reducers/post";
+import { SEARCH_POSTS } from "../constants/actionTypes";
 
 export const getPosts =
   (page = 1, limit = 10) =>
@@ -85,5 +86,14 @@ export const deletePostAction = (id) => async (dispatch) => {
     dispatch(deletePost(id));
   } catch (error) {
     console.log(error.message);
+  }
+};
+
+export const searchPosts = (searchTerm) => async (dispatch) => {
+  try {
+    const { data } = await api.searchPosts(searchTerm);
+    dispatch({ type: SEARCH_POSTS, payload: data });
+  } catch (error) {
+    console.log(error);
   }
 };

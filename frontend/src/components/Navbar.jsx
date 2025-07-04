@@ -1,5 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { getPosts, searchPosts } from "../actions/posts";
 import post from "../assets/nav/post.png";
 import messages from "../assets/nav/messages.png";
 import saved from "../assets/nav/bookmarks.png";
@@ -16,6 +18,9 @@ const Navbar = () => {
   const dropdownRef = useRef(null);
   const navigate = useNavigate();
   const user = JSON.parse(localStorage.getItem("bunso_user"));
+  const [searchTerm, setSearchTerm] = useState("");
+  const dispatch = useDispatch();
+  const debounceTimeout = useRef(null);
 
   // Close dropdown on outside click
   useEffect(() => {
@@ -29,6 +34,18 @@ const Navbar = () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
+
+  useEffect(() => {
+    if (debounceTimeout.current) clearTimeout(debounceTimeout.current);
+    debounceTimeout.current = setTimeout(() => {
+      if (searchTerm.trim() !== "") {
+        dispatch(searchPosts(searchTerm));
+      } else {
+        dispatch(getPosts());
+      }
+    }, 300);
+    return () => clearTimeout(debounceTimeout.current);
+  }, [searchTerm, dispatch]);
 
   const handleSignOut = () => {
     localStorage.removeItem("bunso_token");
@@ -59,7 +76,10 @@ const Navbar = () => {
 
         {/* Center: absolutely centered search bar */}
         <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[40vw] max-w-md">
-          <Searchbar />
+          <Searchbar
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
         </div>
 
         {/* Right: fixed width */}

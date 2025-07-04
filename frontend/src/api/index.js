@@ -19,6 +19,8 @@ export const likePost = (id) => axios.patch(`${url}/${id}/likePost`);
 export const updatePost = (id, updatedPost) =>
   axios.patch(`${url}/${id}`, updatedPost);
 export const deletePost = (id) => axios.delete(`${url}/${id}`);
+export const searchPosts = (searchTerm) =>
+  axios.get(`${url}/search?q=${encodeURIComponent(searchTerm)}`);
 // Auth APIs
 export const register = (userData) => axios.post(`${userUrl}/signup`, userData);
 export const login = (credentials) =>

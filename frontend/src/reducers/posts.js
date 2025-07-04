@@ -5,6 +5,7 @@ import {
   UPDATE,
   DELETE,
   LIKE,
+  SEARCH_POSTS,
 } from "../constants/actionTypes";
 
 const postsSlice = createSlice({
@@ -28,6 +29,9 @@ const postsSlice = createSlice({
         : [action.payload],
     delete: (state, action) =>
       state ? state.filter((post) => post._id !== action.payload) : [],
+  },
+  extraReducers: (builder) => {
+    builder.addCase(SEARCH_POSTS, (state, action) => action.payload);
   },
 });
 

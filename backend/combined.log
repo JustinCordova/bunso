@@ -15,3 +15,5 @@
 {"hasImage":false,"level":"info","message":"Post updated successfully","postId":"68532fd14452647238a987a1","timestamp":"2025-06-18T21:30:07.758Z"}
 {"level":"info","message":"Post deleted successfully","postId":"68532fd14452647238a987a1","timestamp":"2025-06-18T21:38:19.009Z"}
 {"hasImage":true,"level":"info","message":"Post created successfully","postId":"6853321e251cd4240d4fa591","timestamp":"2025-06-18T21:39:44.272Z","title":"My First Post"}
+{"error":"read EHOSTUNREACH","level":"error","message":"Error fetching posts","stack":"Error: read EHOSTUNREACH\n    at TLSWrap.onStreamRead (node:internal/stream_base_commons:216:20)","timestamp":"2025-06-19T15:39:08.057Z"}
+{"error":"read EHOSTUNREACH","level":"error","message":"Error fetching posts","stack":"Error: read EHOSTUNREACH\n    at TLSWrap.onStreamRead (node:internal/stream_base_commons:216:20)","timestamp":"2025-06-19T15:39:30.655Z"}

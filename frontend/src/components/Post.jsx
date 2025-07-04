@@ -12,15 +12,6 @@ const Post = ({ post, setCurrentId }) => {
 
   return (
     <div className="w-full bg-transparent rounded-lg shadow-md overflow-hidden p-4 relative flex flex-col justify-between h-full border border-white/5 backdrop-blur-md hover:bg-[rgba(187,154,247,0.05)] transition-colors duration-600">
-      {/* Image */}
-      {post.selectedFile && (
-        <img
-          src={post.selectedFile}
-          alt={post.title}
-          className="w-full h-48 object-cover rounded-md mb-4"
-        />
-      )}
-
       {/* Content */}
       <div className="flex-1">
         {/* Date and Time (white) */}
