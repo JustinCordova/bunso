@@ -1,0 +1,28 @@
+@import 'tailwindcss';
+
+/* Hide development indicators */
+#__next-build-watcher,
+#__next-prerender-indicator {
+  display: none !important;
+}
+
+/* Custom Theme Colors */
+@theme {
+  --color-gradient-1: #c4a7ff; /* Light Lavender */
+  --color-gradient-2: #b28dff; /* Medium Lavender */
+  --color-gradient-3: #9f6bff; /* Vibrant Lavender */
+  --color-primary: #b28dff; /* Light Lavender (main primary) */
+  --color-secondary: #e0c3ff; /* Very Light Plum (complementary secondary) */
+  --color-accent: #9f6bff; /* Medium Lavender Accent (strong CTA) */
+  --color-dark: #181a1b; /* Dark Background */
+  --color-muted: #a49d91; /* Navbar Icon Color */
+  --color-background: #181a1b; /* Main Background */
+  --color-success: #55efc4; /* Mint Green */
+  --color-warning: #ffba08; /* Golden Yellow */
+  --color-danger: #d63031; /* Crimson Red */
+}
+
+/* Global Background */
+body {
+  background-color: #181a1b;
+}
