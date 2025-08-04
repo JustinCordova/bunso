@@ -1,6 +1,8 @@
 'use client'
 
 import React, { useState } from 'react'
+import { signIn, getSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import BrandSection from '@/components/auth/BrandSection'
 import AuthCard from '@/components/auth/AuthCard'
 import AuthInput from '@/components/auth/AuthInput'
@@ -9,7 +11,10 @@ import AuthButton from '@/components/auth/AuthButton'
 type AuthMode = 'login' | 'register'
 
 export default function AuthPage() {
+  const router = useRouter()
   const [mode, setMode] = useState<AuthMode>('login')
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState('')
   const [formData, setFormData] = useState({
     fullName: '',
     username: '',
@@ -25,15 +30,82 @@ export default function AuthPage() {
       }))
     }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (mode === 'login') {
-      console.log('Login attempt:', {
-        username: formData.username,
-        password: formData.password,
-      })
-    } else {
-      console.log('Register attempt:', formData)
+    setIsLoading(true)
+    setError('')
+
+    try {
+      if (mode === 'login') {
+        // For login, use email or username as email
+        const email = formData.username.includes('@')
+          ? formData.username
+          : formData.email
+        const result = await signIn('credentials', {
+          email,
+          password: formData.password,
+          redirect: false,
+        })
+
+        if (result?.error) {
+          setError('Invalid email or password')
+        } else {
+          router.push('/')
+        }
+      } else {
+        // For registration, create the user first
+        const response = await fetch('/api/auth/register', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            email: formData.email,
+            password: formData.password,
+            fullName: formData.fullName,
+          }),
+        })
+
+        const data = await response.json()
+
+        if (!response.ok) {
+          setError(data.error || 'Registration failed')
+          return
+        }
+
+        // After successful registration, sign in
+        const signInResult = await signIn('credentials', {
+          email: formData.email,
+          password: formData.password,
+          redirect: false,
+        })
+
+        if (signInResult?.error) {
+          setError('Registration successful but sign-in failed')
+        } else {
+          router.push('/')
+        }
+      }
+    } catch (error) {
+      setError('An error occurred. Please try again.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
+  const handleGoogleSignIn = async () => {
+    setIsLoading(true)
+    setError('')
+
+    try {
+      const result = await signIn('google', { redirect: false })
+      if (result?.error) {
+        setError('Google sign-in failed')
+      }
+    } catch (error) {
+      setError('An error occurred with Google sign-in')
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -110,9 +182,38 @@ export default function AuthPage() {
               required
             />
 
-            <AuthButton type="submit">
-              {isLogin ? 'Sign In' : 'Register'}
+            <AuthButton type="submit" disabled={isLoading}>
+              {isLoading ? 'Signing In...' : isLogin ? 'Sign In' : 'Register'}
             </AuthButton>
+
+            {error && (
+              <div className="text-red-500 text-sm text-center">{error}</div>
+            )}
+
+            {/* Only show Google sign-in if Google OAuth is configured */}
+            {process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID && (
+              <>
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <span className="w-full border-t border-gray-300" />
+                  </div>
+                  <div className="relative flex justify-center text-xs uppercase">
+                    <span className="bg-white px-2 text-gray-500">
+                      Or continue with
+                    </span>
+                  </div>
+                </div>
+
+                <AuthButton
+                  type="button"
+                  onClick={handleGoogleSignIn}
+                  disabled={isLoading}
+                  className="bg-white text-gray-900 hover:bg-gray-50"
+                >
+                  {isLoading ? 'Signing In...' : 'Continue with Google'}
+                </AuthButton>
+              </>
+            )}
           </form>
         </AuthCard>
       </div>
