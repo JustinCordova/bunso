@@ -3,8 +3,9 @@ import Image from 'next/image'
 
 const BrandSection = () => {
   return (
-    <div className="flex-1 bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
-      <div className="text-center space-y-6">
+    <div className="flex-1 bg-gradient-to-br from-primary/40 via-accent/50 to-secondary/60 relative flex items-center justify-center">
+      <div className="absolute inset-0 bg-dark/60"></div>
+      <div className="relative z-10 text-center space-y-6">
         <div className="flex justify-center">
           <div className="w-24 h-24 relative">
             <Image
